@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#17251f">
+  <title>Gym Exercise Tracker · v0.1.0</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./" aria-label="Gym Exercise Tracker home">
+      <span class="brand-mark" aria-hidden="true">G</span>
+      <span><strong>Gym Tracker</strong><small>Build the habit, one session at a time</small></span>
+    </a>
+    <span class="version">v0.1.0 · Phase 1</span>
+  </header>
+
+  <main class="page-shell">
+    <section class="welcome">
+      <p class="eyebrow">YOUR TRAINING WEEK</p>
+      <h1>Small steps.<br><span>Steady progress.</span></h1>
+      <p class="welcome-copy">A simple home for your four-day beginner routine. Keep sessions comfortable, focus on controlled reps, and build consistency.</p>
+    </section>
+
+    <section class="summary-grid" aria-label="Weekly overview">
+      <article class="summary-card">
+        <span class="summary-label">Planned this week</span>
+        <strong class="summary-value">4 <span>sessions</span></strong>
+        <span class="summary-note">Mon · Wed · Thu · Sat</span>
+      </article>
+      <article class="summary-card">
+        <span class="summary-label">Session time</span>
+        <strong class="summary-value">≤40 <span>min</span></strong>
+        <span class="summary-note">Warm-up and transitions included</span>
+      </article>
+      <article class="summary-card">
+        <span class="summary-label">Current focus</span>
+        <strong class="summary-value focus-value">Strength</strong>
+        <span class="summary-note">Support muscle preservation</span>
+      </article>
+    </section>
+
+    <section class="schedule-section">
+      <div class="section-heading">
+        <div><p class="eyebrow">THE PLAN</p><h2>Your schedule</h2></div>
+        <span class="section-note" id="week-label">This week</span>
+      </div>
+      <div class="workout-list" id="workout-list" aria-live="polite"></div>
+    </section>
+
+    <aside class="guidance">
+      <span class="guidance-icon" aria-hidden="true">✳</span>
+      <div>
+        <h2>Train for consistency, not exhaustion</h2>
+        <p>Start with a light, manageable load and finish each set feeling you could do about three more reps. Rest 60–90 seconds between sets. Stop any movement that causes pain; adjust or skip it rather than pushing through.</p>
+      </div>
+    </aside>
+
+    <footer class="site-footer">
+      <span>Gym Exercise Tracker</span>
+      <span>Phase 1 · Schedule foundation</span>
+    </footer>
+  </main>
+</body>
+</html>

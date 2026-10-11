@@ -1,0 +1,88 @@
+:root {
+  color-scheme: light;
+  --ink: #1b2923;
+  --muted: #68766f;
+  --paper: #f5f6f1;
+  --surface: #ffffff;
+  --line: #e1e7df;
+  --green: #2e6048;
+  --green-dark: #1b3e2d;
+  --mint: #e5efe6;
+  --amber: #f4ead6;
+  --shadow: 0 10px 30px rgba(25, 48, 35, .05);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); line-height: 1.5; }
+.site-header { min-height: 76px; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px max(22px, calc((100vw - 1120px) / 2)); background: var(--surface); border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 12px; color: inherit; text-decoration: none; }
+.brand-mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 13px; background: var(--green-dark); color: white; font-weight: 800; font-size: 1.25rem; }
+.brand strong, .brand small { display: block; }
+.brand strong { letter-spacing: -.02em; }
+.brand small { margin-top: 2px; color: var(--muted); font-size: .78rem; }
+.version { padding: 6px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: .75rem; white-space: nowrap; }
+.page-shell { width: min(100% - 40px, 1040px); margin: 0 auto; }
+.welcome { padding: 52px 0 28px; }
+.eyebrow { margin: 0 0 9px; color: var(--green); font-size: .72rem; font-weight: 800; letter-spacing: .14em; }
+h1, h2, p { margin-top: 0; }
+h1 { margin-bottom: 14px; font-size: clamp(2.4rem, 6vw, 4.2rem); line-height: .99; letter-spacing: -.065em; }
+h1 span { color: var(--green); }
+.welcome-copy { max-width: 590px; margin-bottom: 0; color: var(--muted); font-size: 1rem; }
+.summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 12px 0 44px; }
+.summary-card { min-width: 0; padding: 19px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); }
+.summary-label, .summary-note { display: block; color: var(--muted); font-size: .8rem; }
+.summary-value { display: block; margin: 10px 0 7px; font-size: clamp(1.5rem, 3vw, 2rem); line-height: 1.1; letter-spacing: -.045em; }
+.summary-value span { font-size: .85rem; font-weight: 500; letter-spacing: 0; }
+.focus-value { color: var(--green); }
+.summary-note { font-size: .75rem; }
+.section-heading { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-bottom: 17px; }
+.section-heading h2 { margin-bottom: 0; font-size: 1.7rem; letter-spacing: -.04em; }
+.section-note { color: var(--muted); font-size: .8rem; padding-bottom: 4px; }
+.workout-list { display: grid; gap: 12px; }
+.workout-card { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; gap: 20px; align-items: start; padding: 20px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); }
+.day-block { padding: 10px 6px; text-align: center; background: var(--mint); border-radius: 12px; color: var(--green-dark); }
+.day-block .day-short { display: block; font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .09em; }
+.day-block .day-date { display: block; margin-top: 2px; font-size: 1.45rem; font-weight: 800; letter-spacing: -.05em; }
+.workout-main h3 { margin: 0 0 5px; font-size: 1.08rem; letter-spacing: -.025em; }
+.workout-description { margin: 0 0 13px; color: var(--muted); font-size: .83rem; }
+.exercise-chips { display: flex; flex-wrap: wrap; gap: 7px; }
+.exercise-chip { padding: 6px 9px; border: 1px solid var(--line); border-radius: 8px; background: #fbfcf9; font-size: .76rem; }
+.exercise-chip strong { color: var(--green-dark); font-weight: 700; }
+.workout-meta { display: flex; flex-direction: column; align-items: end; gap: 8px; min-width: 95px; }
+.status-pill { padding: 5px 9px; border-radius: 999px; background: #eef0ec; color: #606d64; font-size: .7rem; font-weight: 750; white-space: nowrap; }
+.status-pill.today { background: var(--amber); color: #785a1b; }
+.time-estimate { color: var(--muted); font-size: .75rem; white-space: nowrap; }
+.guidance { display: flex; gap: 15px; margin: 34px 0 28px; padding: 22px; border: 1px solid #d7e3d6; border-radius: 16px; background: #edf4eb; }
+.guidance-icon { flex: 0 0 35px; display: grid; place-items: center; width: 35px; height: 35px; border-radius: 10px; background: white; color: var(--green); font-size: 1.15rem; }
+.guidance h2 { margin: 1px 0 5px; font-size: 1rem; }
+.guidance p { margin-bottom: 0; color: #526258; font-size: .84rem; }
+.site-footer { display: flex; justify-content: space-between; gap: 12px; padding: 20px 0 28px; border-top: 1px solid var(--line); color: var(--muted); font-size: .74rem; }
+.empty-state { padding: 25px; border: 1px dashed var(--line); border-radius: 14px; color: var(--muted); text-align: center; }
+@media (max-width: 680px) {
+  .site-header { min-height: 68px; padding: 12px 18px; }
+  .brand small { max-width: 180px; font-size: .7rem; }
+  .version { font-size: .68rem; padding: 5px 8px; }
+  .page-shell { width: min(100% - 32px, 1040px); }
+  .welcome { padding-top: 39px; }
+  .summary-grid { gap: 8px; margin-bottom: 35px; }
+  .summary-card { padding: 13px 11px; border-radius: 12px; }
+  .summary-label { font-size: .69rem; }
+  .summary-note { font-size: .67rem; }
+  .summary-value { margin-top: 8px; font-size: 1.4rem; }
+  .summary-value span { font-size: .72rem; }
+  .workout-card { grid-template-columns: 58px minmax(0, 1fr); gap: 13px; padding: 14px; }
+  .day-block { padding: 8px 3px; }
+  .day-block .day-date { font-size: 1.25rem; }
+  .workout-meta { grid-column: 2; flex-direction: row; align-items: center; min-width: 0; margin-top: -2px; }
+  .exercise-chips { gap: 6px; }
+  .exercise-chip { font-size: .72rem; padding: 5px 7px; }
+  .guidance { padding: 17px; gap: 11px; }
+  .site-footer { flex-direction: column; gap: 4px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .workout-card { animation: appear .35s ease both; }
+  .workout-card:nth-child(2) { animation-delay: .04s; }
+  .workout-card:nth-child(3) { animation-delay: .08s; }
+  .workout-card:nth-child(4) { animation-delay: .12s; }
+  @keyframes appear { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+}
