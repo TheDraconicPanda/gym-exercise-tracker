@@ -78,6 +78,15 @@ try {
 } catch { storageAvailable = false; }
 let selectedDate = new Date();
 selectedDate.setHours(12, 0, 0, 0);
+function isTrainingDay(date) {
+  return WORKOUTS.some(workout => workout.day === date.getDay());
+}
+function moveToTrainingDay(date, direction, includeCurrent = false) {
+  if (!includeCurrent) date.setDate(date.getDate() + direction);
+  while (!isTrainingDay(date)) date.setDate(date.getDate() + direction);
+  return date;
+}
+moveToTrainingDay(selectedDate, 1, true);
 const dateKey = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
 const escapeHTML = value => String(value).replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 function previousEntry(workout, index) {
@@ -91,13 +100,15 @@ function previousEntry(workout, index) {
 function valuesFor(workout, index) {
   const saved = sessions[dateKey(selectedDate)]?.[workout.id]?.[index];
   const numbers = workout.exercises[index].target.match(/\d+/g).map(Number);
-  return {sets: saved?.sets ?? numbers[0], reps: saved?.reps ?? numbers[2] ?? numbers[1]};
+  return {sets: saved?.sets ?? numbers[0], reps: saved?.reps ?? numbers[2] ?? numbers[1], weight: saved?.weight ?? ""};
 }
 function renderDashboard() {
   const workout = WORKOUTS.find(item => item.day === selectedDate.getDay());
   const isToday = dateKey(selectedDate) === dateKey(new Date());
   document.getElementById("day-label").textContent = new Intl.DateTimeFormat(undefined, {weekday:"long", month:"short", day:"numeric"}).format(selectedDate);
-  document.getElementById("today-button").hidden = isToday;
+  const defaultDate = moveToTrainingDay(new Date(), 1, true);
+  document.getElementById("today-button").hidden = dateKey(selectedDate) === dateKey(defaultDate);
+  document.getElementById("today-button").textContent = isTrainingDay(new Date()) ? "Today" : "Next workout";
   document.getElementById("day-status").textContent = isToday ? "Today" : "Your schedule";
   document.getElementById("workout-title").textContent = workout?.title || "Rest day";
   document.getElementById("session-time").textContent = workout?.minutes || "No scheduled training";
@@ -105,7 +116,7 @@ function renderDashboard() {
     const values = valuesFor(workout,index);
     const previous = previousEntry(workout,index);
     const perSide = exercise.target.includes("side");
-    return `<article class="exercise-row"><div class="exercise-name"><h2>${escapeHTML(exercise.name)}</h2><p>${previous ? `Last · ${escapeHTML(previous.day)} · ${previous.sets} × ${previous.reps}${perSide ? " / side" : ""}` : `Suggested · ${escapeHTML(exercise.target)}`}</p></div><div class="exercise-values"><label><span>Sets</span><input type="number" inputmode="numeric" min="1" max="99" step="1" value="${values.sets}" data-index="${index}" data-field="sets" aria-label="${escapeHTML(exercise.name)} sets"></label><span class="multiply" aria-hidden="true">×</span><label><span>Reps${perSide ? " / side" : ""}</span><input type="number" inputmode="numeric" min="1" max="99" step="1" value="${values.reps}" data-index="${index}" data-field="reps" aria-label="${escapeHTML(exercise.name)} repetitions${perSide ? " per side" : ""}"></label></div></article>`;
+    return `<article class="exercise-row"><div class="exercise-name"><h2>${escapeHTML(exercise.name)}</h2><p>${previous ? `Last · ${escapeHTML(previous.day)} · ${previous.sets} × ${previous.reps}${previous.weight !== undefined && previous.weight !== "" ? ` · ${escapeHTML(previous.weight)} kg` : ""}${perSide ? " / side" : ""}` : `Suggested · ${escapeHTML(exercise.target)}`}</p></div><div class="exercise-values"><label><span>Sets</span><input type="number" inputmode="numeric" min="1" max="99" step="1" value="${values.sets}" data-index="${index}" data-field="sets" aria-label="${escapeHTML(exercise.name)} sets"></label><span class="multiply" aria-hidden="true">×</span><label><span>Reps${perSide ? " / side" : ""}</span><input type="number" inputmode="numeric" min="1" max="99" step="1" value="${values.reps}" data-index="${index}" data-field="reps" aria-label="${escapeHTML(exercise.name)} repetitions${perSide ? " per side" : ""}"></label><label class="weight-field"><span>kg</span><input type="number" inputmode="decimal" min="0" max="9999" step="any" placeholder="—" value="${escapeHTML(values.weight)}" data-index="${index}" data-field="weight" aria-label="${escapeHTML(exercise.name)} weight in kilograms"></label></div></article>`;
   }).join("") : '<div class="rest-day">No workout planned. Use the arrows to view another day.</div>';
   document.getElementById("session-extras").hidden = !workout;
   document.getElementById("warmup").textContent = workout?.warmup || "";
@@ -114,10 +125,14 @@ function renderDashboard() {
   document.getElementById("save-status").textContent = storageAvailable ? "Saved on this browser · tap a number to edit" : "Browser storage unavailable. Changes may be lost on refresh.";
 }
 function saveInput(input) {
-  const value = Number(input.value);
-  if (!Number.isInteger(value) || value < 1 || value > 99 || !input.value.trim()) {
+  const isWeight = input.dataset.field === "weight";
+  const value = isWeight && !input.value.trim() ? "" : Number(input.value);
+  const valid = isWeight
+    ? value === "" || (Number.isFinite(value) && value >= 0 && value <= 9999)
+    : Number.isInteger(value) && value >= 1 && value <= 99 && input.value.trim();
+  if (!valid) {
     input.setAttribute("aria-invalid", "true");
-    document.getElementById("save-status").textContent = "Enter a whole number from 1 to 99. This change has not been saved.";
+    document.getElementById("save-status").textContent = isWeight ? "Enter a weight from 0 to 9999 kg. This change has not been saved." : "Enter a whole number from 1 to 99. This change has not been saved.";
     return;
   }
   input.removeAttribute("aria-invalid");
@@ -141,12 +156,12 @@ document.getElementById("workout-list").addEventListener("input", event => {
 });
 for (const [id, offset] of [["previous-day",-1],["next-day",1]]) {
   document.getElementById(id).addEventListener("click", () => {
-    selectedDate.setDate(selectedDate.getDate()+offset);
+    moveToTrainingDay(selectedDate, offset);
     renderDashboard();
   });
 }
 document.getElementById("today-button").addEventListener("click", () => {
-  selectedDate = new Date(); selectedDate.setHours(12,0,0,0); renderDashboard();
+  selectedDate = new Date(); selectedDate.setHours(12,0,0,0); moveToTrainingDay(selectedDate, 1, true); renderDashboard();
 });
 // Long press a number, then slide vertically. A normal tap still opens the keyboard.
 let drag;
@@ -154,7 +169,7 @@ const list = document.getElementById("workout-list");
 list.addEventListener("pointerdown", event => {
   if (!event.target.matches("input") || event.button !== 0) return;
   const input = event.target;
-  drag = {input, y:event.clientY, start:Number(input.value)||1, active:false};
+  drag = {input, y:event.clientY, start:Number(input.value) || (input.dataset.field === "weight" ? 0 : 1), active:false};
   drag.timer = setTimeout(() => {
     if (!drag) return;
     drag.active = true;
@@ -169,7 +184,9 @@ list.addEventListener("pointermove", event => {
     if (Math.abs(event.clientY-drag.y)>8) {clearTimeout(drag.timer); drag = null;}
     return;
   }
-  const value = Math.max(1,Math.min(99,drag.start+Math.trunc((drag.y-event.clientY)/14)));
+  const isWeight = drag.input.dataset.field === "weight";
+  const value = Math.max(isWeight ? 0 : 1, Math.min(isWeight ? 9999 : 99,
+    Math.round((drag.start + Math.trunc((drag.y-event.clientY)/14) * (isWeight ? 0.5 : 1)) * 100) / 100));
   if (Number(drag.input.value)!==value) {drag.input.value=value; saveInput(drag.input);}
 });
 function stopDrag() {

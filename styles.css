@@ -251,3 +251,10 @@ h1 {
     font-size:.85rem;
   }
 }
+
+.exercise-values .weight-field input { width:64px; font-size:1rem; }
+@media(max-width:480px) {
+  .exercise-row { flex-wrap:wrap; }
+  .exercise-name { flex-basis:100%; }
+  .exercise-values { width:100%; justify-content:flex-end; }
+}
