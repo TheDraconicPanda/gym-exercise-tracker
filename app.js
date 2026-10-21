@@ -77,10 +77,9 @@ const EXERCISE_GUIDES = {
     "row": 0
   },
   "Seated chest press": {
-    "image": "images/monday-illustrations.png",
-    "cue": "Press forward, then return slowly with your back supported.",
-    "column": 1,
-    "row": 0
+    "image": "images/chest-press-steps.png",
+    "standalone": true,
+    "cue": "Push the handles forward from chest height. Keep your back on the pad; slowly return until your elbows are bent."
   },
   "Seated cable row": {
     "image": "images/monday-illustrations.png",
@@ -89,17 +88,14 @@ const EXERCISE_GUIDES = {
     "row": 1
   },
   "Seated hamstring curl": {
-    "image": "images/monday-illustrations.png",
-    "cue": "Curl your lower legs down under the seat; return with control.",
-    "column": 1,
-    "row": 1
+    "image": "images/hamstring-curl-steps.png",
+    "standalone": true,
+    "cue": "Curl your lower legs down and back under the seat against the ankle roller. Keep thighs under the pad; slowly return. This is a curl, not a leg extension."
   },
   "Lat pulldown": {
-    "image": "images/lat-pulldown-illustration.png",
-    "size": 100,
-    "cue": "Pull the bar toward your upper chest without leaning far back.",
-    "column": 0,
-    "row": 0
+    "image": "images/lat-pulldown-steps.png",
+    "standalone": true,
+    "cue": "Sit facing the machine with thighs under the pad. Pull the bar down in front of you to your upper chest, then return overhead with control."
   },
   "Seated shoulder press": {
     "image": "images/wednesday-illustrations.png",
@@ -116,10 +112,9 @@ const EXERCISE_GUIDES = {
     "row": 1
   },
   "Biceps curl machine": {
-    "image": "images/wednesday-illustrations.png",
-    "cue": "Curl toward your shoulders while keeping upper arms on the pad.",
-    "column": 1,
-    "row": 1
+    "image": "images/biceps-curl-steps.png",
+    "standalone": true,
+    "cue": "Keep upper arms on the preacher pad. Bend your elbows to curl the handles toward your shoulders, then lower slowly."
   },
   "Cable triceps pushdown": {
     "image": "images/thursday-illustrations.png",
@@ -140,10 +135,9 @@ const EXERCISE_GUIDES = {
     "row": 1
   },
   "Chest press variation": {
-    "image": "images/saturday-illustrations.png",
-    "cue": "Press forward with control, using a comfortable grip.",
-    "column": 1,
-    "row": 0
+    "image": "images/chest-press-variation-steps.png",
+    "standalone": true,
+    "cue": "Use a neutral grip, with palms facing each other. Push the handles forward at chest height, then return slowly with your back on the pad."
   },
   "Chest-supported row": {
     "image": "images/saturday-illustrations.png",
@@ -208,7 +202,7 @@ function renderDashboard() {
     const previous = previousEntry(workout,index);
     const perSide = exercise.target.includes("side");
     const guide = EXERCISE_GUIDES[exercise.name];
-    return `<article class="exercise-row"><div class="exercise-name"><h2><button class="exercise-toggle" type="button" aria-expanded="false" aria-controls="exercise-guide-${index}">${escapeHTML(exercise.name)}<span class="guide-chevron" aria-hidden="true">⌄</span></button></h2><p>${previous ? `Last · ${escapeHTML(previous.day)} · ${previous.sets} × ${previous.reps}${previous.weight !== undefined && previous.weight !== "" ? ` · ${escapeHTML(previous.weight)} kg` : ""}${perSide ? " / side" : ""}` : `Suggested · ${escapeHTML(exercise.target)}`}</p></div><div class="exercise-values"><label><span>Sets</span><input type="number" inputmode="numeric" min="1" max="99" step="1" value="${values.sets}" data-index="${index}" data-field="sets" aria-label="${escapeHTML(exercise.name)} sets"></label><span class="multiply" aria-hidden="true">×</span><label><span>Reps${perSide ? " / side" : ""}</span><input type="number" inputmode="numeric" min="1" max="99" step="1" value="${values.reps}" data-index="${index}" data-field="reps" aria-label="${escapeHTML(exercise.name)} repetitions${perSide ? " per side" : ""}"></label><label class="weight-field"><span>kg</span><input type="number" inputmode="decimal" min="0" max="9999" step="any" placeholder="—" value="${escapeHTML(values.weight)}" data-index="${index}" data-field="weight" aria-label="${escapeHTML(exercise.name)} weight in kilograms"></label></div><div class="exercise-guide" id="exercise-guide-${index}" hidden><div class="exercise-illustration"><img src="${guide.image}" alt="Illustrated ${escapeHTML(exercise.name)} with equipment and highlighted working muscles" loading="lazy" style="left:-${guide.column * 100}%;top:-${guide.top ?? guide.row * 100}%;width:${guide.size ?? 200}%;height:${guide.size ?? 200}%"></div><p>${escapeHTML(guide.cue)}</p></div></article>`;
+    return `<article class="exercise-row"><div class="exercise-name"><h2><button class="exercise-toggle" type="button" aria-expanded="false" aria-controls="exercise-guide-${index}">${escapeHTML(exercise.name)}<span class="guide-chevron" aria-hidden="true">⌄</span></button></h2><p>${previous ? `Last · ${escapeHTML(previous.day)} · ${previous.sets} × ${previous.reps}${previous.weight !== undefined && previous.weight !== "" ? ` · ${escapeHTML(previous.weight)} kg` : ""}${perSide ? " / side" : ""}` : `Suggested · ${escapeHTML(exercise.target)}`}</p></div><div class="exercise-values"><label><span>Sets</span><input type="number" inputmode="numeric" min="1" max="99" step="1" value="${values.sets}" data-index="${index}" data-field="sets" aria-label="${escapeHTML(exercise.name)} sets"></label><span class="multiply" aria-hidden="true">×</span><label><span>Reps${perSide ? " / side" : ""}</span><input type="number" inputmode="numeric" min="1" max="99" step="1" value="${values.reps}" data-index="${index}" data-field="reps" aria-label="${escapeHTML(exercise.name)} repetitions${perSide ? " per side" : ""}"></label><label class="weight-field"><span>kg</span><input type="number" inputmode="decimal" min="0" max="9999" step="any" placeholder="—" value="${escapeHTML(values.weight)}" data-index="${index}" data-field="weight" aria-label="${escapeHTML(exercise.name)} weight in kilograms"></label></div><div class="exercise-guide" id="exercise-guide-${index}" hidden><div class="exercise-illustration"${guide.standalone ? ' data-layout="standalone"' : ""}><img src="${guide.image}" alt="${guide.standalone ? "Start and finish illustrations of" : "Illustrated"} ${escapeHTML(exercise.name)} with equipment and highlighted working muscles" loading="lazy" style="${guide.standalone ? "" : `left:-${guide.column * 100}%;top:-${guide.top ?? guide.row * 100}%;width:${guide.size ?? 200}%;height:${guide.size ?? 200}%`}"></div><p>${escapeHTML(guide.cue)}</p></div></article>`;
   }).join("") : '<div class="rest-day">No workout planned. Use the arrows to view another day.</div>';
   document.getElementById("session-extras").hidden = !workout;
   document.getElementById("warmup").textContent = workout?.warmup || "";

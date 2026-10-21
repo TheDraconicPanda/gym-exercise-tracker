@@ -1,6 +1,6 @@
 # Gym Exercise Tracker
 
-Current version: **0.2.3** — detailed illustrated exercise guides.
+Current version: **0.2.4** — clearer start/finish guides for chest presses, hamstring curls, lat pulldowns, and biceps curls.
 
 A small, mobile-friendly workout tracker for a beginner four-day gym routine. Built with plain HTML, CSS, and JavaScript.
 
@@ -28,4 +28,4 @@ Run `node --test tests/dashboard.test.cjs` to check daily navigation, prescripti
 
 Use comfortable ranges and controlled movements. Start light, leave roughly three reps in reserve, and rest 60–90 seconds between sets. Stop or adjust movements that cause pain; seek an appropriate clinical assessment if knee symptoms recur, worsen, or affect normal walking.
 
-Tap an exercise card to expand its shaded instructional illustration and movement cue. Original generated illustrations show the figure, equipment, and highlighted muscles. Bundled PNG sheets are displayed one exercise at a time, with no external image service or photo dependencies. The sets, reps, and weight controls remain independent of the guide toggle.
+Tap an exercise card to expand its shaded instructional illustration and movement cue. Original generated illustrations show the figure, equipment, and highlighted muscles. Corrected chest press, hamstring curl, lat pulldown, and biceps curl guides use standalone start/finish images; other illustrations use bundled PNG sheets displayed one exercise at a time, with no external image service or photo dependencies. The sets, reps, and weight controls remain independent of the guide toggle.

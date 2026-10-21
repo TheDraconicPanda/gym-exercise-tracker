@@ -304,3 +304,14 @@ h1 {
   max-width:none;
   margin:0;
 }
+
+/* Standalone guides use their natural proportions; no sheet cropping. */
+.exercise-illustration[data-layout="standalone"] {
+  aspect-ratio:auto;
+  max-width:600px;
+}
+.exercise-guide .exercise-illustration[data-layout="standalone"] img {
+  position:static;
+  width:100%;
+  height:auto;
+}

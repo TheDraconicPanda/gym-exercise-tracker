@@ -121,3 +121,18 @@ test('every scheduled exercise has a bundled drawing and the main time label is 
   }
   assert.ok(!fs.readFileSync(path.join(root,'index.html'),'utf8').includes('id="session-time"'));
 });
+
+test('corrected exercise guides render whole standalone images with clear movement cues',()=>{
+  const monday=boot().get('workout-list').innerHTML;
+  const wednesday=boot('2026-10-21T12:00:00').get('workout-list').innerHTML;
+  const saturday=boot('2026-10-24T12:00:00').get('workout-list').innerHTML;
+  for(const [markup,slug] of [[monday,'chest-press'],[monday,'hamstring-curl'],[wednesday,'lat-pulldown'],[wednesday,'biceps-curl'],[saturday,'chest-press-variation']]) {
+    assert.ok(markup.includes(`data-layout="standalone"><img src="images/${slug}-steps.png"`));
+    const image=markup.match(new RegExp(`<img src="images/${slug}-steps.png"[^>]+>`))[0];
+    assert.match(image,/style=""/);
+    assert.doesNotMatch(image,/NaN|undefined/);
+  }
+  assert.match(monday,/Curl your lower legs down and back/);
+  assert.match(wednesday,/Sit facing the machine/);
+  assert.match(saturday,/palms facing each other/);
+});
