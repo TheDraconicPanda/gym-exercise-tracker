@@ -91,7 +91,7 @@ test('existing sets and reps without weight remain readable',()=>{
 test('exercise guide toggles independently of saved workout values',()=>{
   const app=boot();
   assert.match(app.get('workout-list').innerHTML,/aria-expanded="false" aria-controls="exercise-guide-0"/);
-  assert.match(app.get('workout-list').innerHTML,/images\/leg-press.svg/);
+  assert.match(app.get('workout-list').innerHTML,/images\/monday-illustrations.png/);
   const attrs={'aria-expanded':'false','aria-controls':'exercise-guide-0'};
   const button={getAttribute:key=>attrs[key],setAttribute:(key,value)=>attrs[key]=value};
   const panel=app.get('exercise-guide-0'); panel.hidden=true;
@@ -110,8 +110,13 @@ test('every scheduled exercise has a bundled drawing and the main time label is 
     const markup=boot(date+'T12:00:00').get('workout-list').innerHTML;
     const images=[...markup.matchAll(/<img src="([^"]+)"/g)];
     assert.ok(images.length>=3);
+    assert.equal((markup.match(/class="exercise-illustration"/g)||[]).length,images.length);
+    for(const [,left,top] of markup.matchAll(/style="left:-(\d+)%;top:-(\d+)%;/g)) {
+      assert.ok(['0','100'].includes(left)); assert.ok(['0','90','94','100'].includes(top));
+    }
     for(const [,image] of images) {
-      assert.ok(fs.readFileSync(path.join(root,image),'utf8').includes('<svg'));
+      const bytes=fs.readFileSync(path.join(root,image));
+      assert.equal(bytes.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
     }
   }
   assert.ok(!fs.readFileSync(path.join(root,'index.html'),'utf8').includes('id="session-time"'));

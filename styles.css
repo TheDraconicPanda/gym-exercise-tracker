@@ -285,3 +285,22 @@ h1 {
 
 .exercise-row { cursor:pointer; }
 .exercise-values, .exercise-guide { cursor:auto; }
+
+.exercise-illustration {
+  position:relative;
+  width:100%;
+  max-width:420px;
+  aspect-ratio:1;
+  overflow:hidden;
+  margin:0 auto;
+  border-radius:12px;
+  background:white;
+}
+.exercise-guide .exercise-illustration img {
+  position:absolute;
+  display:block;
+  width:200%;
+  height:200%;
+  max-width:none;
+  margin:0;
+}

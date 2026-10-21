@@ -71,60 +71,93 @@ const WORKOUTS = [
 
 const EXERCISE_GUIDES = {
   "Leg press": {
-    "image": "images/leg-press.svg",
-    "cue": "Press the platform away without locking your knees."
+    "image": "images/monday-illustrations.png",
+    "cue": "Press the platform away without locking your knees.",
+    "column": 0,
+    "row": 0
   },
   "Seated chest press": {
-    "image": "images/chest-press.svg",
-    "cue": "Press forward, then return slowly with your back supported."
+    "image": "images/monday-illustrations.png",
+    "cue": "Press forward, then return slowly with your back supported.",
+    "column": 1,
+    "row": 0
   },
   "Seated cable row": {
-    "image": "images/cable-row.svg",
-    "cue": "Pull toward your ribs, keeping your torso steady."
+    "image": "images/monday-illustrations.png",
+    "cue": "Pull toward your ribs, keeping your torso steady.",
+    "column": 0,
+    "row": 1
   },
   "Seated hamstring curl": {
-    "image": "images/hamstring-curl.svg",
-    "cue": "Curl your lower legs down under the seat; return with control."
+    "image": "images/monday-illustrations.png",
+    "cue": "Curl your lower legs down under the seat; return with control.",
+    "column": 1,
+    "row": 1
   },
   "Lat pulldown": {
-    "image": "images/lat-pulldown.svg",
-    "cue": "Pull the bar toward your upper chest without leaning far back."
+    "image": "images/lat-pulldown-illustration.png",
+    "size": 100,
+    "cue": "Pull the bar toward your upper chest without leaning far back.",
+    "column": 0,
+    "row": 0
   },
   "Seated shoulder press": {
-    "image": "images/shoulder-press.svg",
-    "cue": "Press upward smoothly, keeping your back supported."
+    "image": "images/wednesday-illustrations.png",
+    "cue": "Press upward smoothly, keeping your back supported.",
+    "column": 1,
+    "row": 0
   },
   "Glute drive machine": {
-    "image": "images/glute-drive.svg",
-    "cue": "Drive through your feet and raise your hips without arching your back."
+    "image": "images/wednesday-illustrations.png",
+    "size": 180,
+    "top": 90,
+    "cue": "Drive through your feet and raise your hips without arching your back.",
+    "column": 0,
+    "row": 1
   },
   "Biceps curl machine": {
-    "image": "images/biceps-curl.svg",
-    "cue": "Curl toward your shoulders while keeping upper arms on the pad."
+    "image": "images/wednesday-illustrations.png",
+    "cue": "Curl toward your shoulders while keeping upper arms on the pad.",
+    "column": 1,
+    "row": 1
   },
   "Cable triceps pushdown": {
-    "image": "images/triceps-pushdown.svg",
-    "cue": "Keep elbows by your sides and extend your forearms downward."
+    "image": "images/thursday-illustrations.png",
+    "cue": "Keep elbows by your sides and extend your forearms downward.",
+    "column": 0,
+    "row": 0
   },
   "Pallof press": {
-    "image": "images/pallof-press.svg",
-    "cue": "Press straight out from your chest; resist turning toward the cable."
+    "image": "images/thursday-illustrations.png",
+    "cue": "Press straight out from your chest; resist turning toward the cable.",
+    "column": 1,
+    "row": 0
   },
   "Bird dog": {
-    "image": "images/bird-dog.svg",
-    "cue": "Reach opposite arm and leg out, keeping your hips level. Alternate sides."
+    "image": "images/thursday-illustrations.png",
+    "cue": "Reach opposite arm and leg out, keeping your hips level. Alternate sides.",
+    "column": 0,
+    "row": 1
   },
   "Chest press variation": {
-    "image": "images/chest-press-variation.svg",
-    "cue": "Press forward with control, using a comfortable grip."
+    "image": "images/saturday-illustrations.png",
+    "cue": "Press forward with control, using a comfortable grip.",
+    "column": 1,
+    "row": 0
   },
   "Chest-supported row": {
-    "image": "images/chest-supported-row.svg",
-    "cue": "Keep your chest against the pad as you pull your elbows back."
+    "image": "images/saturday-illustrations.png",
+    "top": 94,
+    "cue": "Keep your chest against the pad as you pull your elbows back.",
+    "column": 0,
+    "row": 1
   },
   "Seated hip abductor": {
-    "image": "images/hip-abductor.svg",
-    "cue": "Open your knees outward, then return slowly without bouncing."
+    "image": "images/saturday-illustrations.png",
+    "top": 94,
+    "cue": "Open your knees outward, then return slowly without bouncing.",
+    "column": 1,
+    "row": 1
   }
 };
 
@@ -175,7 +208,7 @@ function renderDashboard() {
     const previous = previousEntry(workout,index);
     const perSide = exercise.target.includes("side");
     const guide = EXERCISE_GUIDES[exercise.name];
-    return `<article class="exercise-row"><div class="exercise-name"><h2><button class="exercise-toggle" type="button" aria-expanded="false" aria-controls="exercise-guide-${index}">${escapeHTML(exercise.name)}<span class="guide-chevron" aria-hidden="true">⌄</span></button></h2><p>${previous ? `Last · ${escapeHTML(previous.day)} · ${previous.sets} × ${previous.reps}${previous.weight !== undefined && previous.weight !== "" ? ` · ${escapeHTML(previous.weight)} kg` : ""}${perSide ? " / side" : ""}` : `Suggested · ${escapeHTML(exercise.target)}`}</p></div><div class="exercise-values"><label><span>Sets</span><input type="number" inputmode="numeric" min="1" max="99" step="1" value="${values.sets}" data-index="${index}" data-field="sets" aria-label="${escapeHTML(exercise.name)} sets"></label><span class="multiply" aria-hidden="true">×</span><label><span>Reps${perSide ? " / side" : ""}</span><input type="number" inputmode="numeric" min="1" max="99" step="1" value="${values.reps}" data-index="${index}" data-field="reps" aria-label="${escapeHTML(exercise.name)} repetitions${perSide ? " per side" : ""}"></label><label class="weight-field"><span>kg</span><input type="number" inputmode="decimal" min="0" max="9999" step="any" placeholder="—" value="${escapeHTML(values.weight)}" data-index="${index}" data-field="weight" aria-label="${escapeHTML(exercise.name)} weight in kilograms"></label></div><div class="exercise-guide" id="exercise-guide-${index}" hidden><img src="${guide.image}" alt="Line drawing of ${escapeHTML(exercise.name)}, showing start and finish positions" loading="lazy" width="420" height="210"><p>${escapeHTML(guide.cue)}</p></div></article>`;
+    return `<article class="exercise-row"><div class="exercise-name"><h2><button class="exercise-toggle" type="button" aria-expanded="false" aria-controls="exercise-guide-${index}">${escapeHTML(exercise.name)}<span class="guide-chevron" aria-hidden="true">⌄</span></button></h2><p>${previous ? `Last · ${escapeHTML(previous.day)} · ${previous.sets} × ${previous.reps}${previous.weight !== undefined && previous.weight !== "" ? ` · ${escapeHTML(previous.weight)} kg` : ""}${perSide ? " / side" : ""}` : `Suggested · ${escapeHTML(exercise.target)}`}</p></div><div class="exercise-values"><label><span>Sets</span><input type="number" inputmode="numeric" min="1" max="99" step="1" value="${values.sets}" data-index="${index}" data-field="sets" aria-label="${escapeHTML(exercise.name)} sets"></label><span class="multiply" aria-hidden="true">×</span><label><span>Reps${perSide ? " / side" : ""}</span><input type="number" inputmode="numeric" min="1" max="99" step="1" value="${values.reps}" data-index="${index}" data-field="reps" aria-label="${escapeHTML(exercise.name)} repetitions${perSide ? " per side" : ""}"></label><label class="weight-field"><span>kg</span><input type="number" inputmode="decimal" min="0" max="9999" step="any" placeholder="—" value="${escapeHTML(values.weight)}" data-index="${index}" data-field="weight" aria-label="${escapeHTML(exercise.name)} weight in kilograms"></label></div><div class="exercise-guide" id="exercise-guide-${index}" hidden><div class="exercise-illustration"><img src="${guide.image}" alt="Illustrated ${escapeHTML(exercise.name)} with equipment and highlighted working muscles" loading="lazy" style="left:-${guide.column * 100}%;top:-${guide.top ?? guide.row * 100}%;width:${guide.size ?? 200}%;height:${guide.size ?? 200}%"></div><p>${escapeHTML(guide.cue)}</p></div></article>`;
   }).join("") : '<div class="rest-day">No workout planned. Use the arrows to view another day.</div>';
   document.getElementById("session-extras").hidden = !workout;
   document.getElementById("warmup").textContent = workout?.warmup || "";
