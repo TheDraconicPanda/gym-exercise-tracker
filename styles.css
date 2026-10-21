@@ -315,3 +315,12 @@ h1 {
   width:100%;
   height:auto;
 }
+
+.schedule-editor { border-top:1px solid var(--line); padding:14px 0; }
+.schedule-editor summary { cursor:pointer; font-size:.85rem; font-weight:650; color:var(--green-dark); min-height:28px; }
+#schedule-week { margin:10px 0 4px; font-size:.85rem; font-weight:650; }
+.schedule-help, #schedule-status { font-size:.75rem; color:var(--muted); margin:8px 0 12px; }
+#schedule-days { display:grid; gap:10px; }
+.schedule-row { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.2fr); align-items:center; gap:10px; font-size:.8rem; }
+.schedule-row select { width:100%; min-height:44px; padding:8px; font:inherit; color:var(--green-dark); border:1px solid var(--line); border-radius:10px; background:var(--surface); }
+.schedule-row select:focus-visible { outline:3px solid var(--green); outline-offset:2px; }

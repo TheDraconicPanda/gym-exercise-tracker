@@ -162,10 +162,33 @@ try {
   sessions = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
   if (!sessions || typeof sessions !== "object" || Array.isArray(sessions)) sessions = {};
 } catch { storageAvailable = false; }
+const dateKey = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
 let selectedDate = new Date();
 selectedDate.setHours(12, 0, 0, 0);
+const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+function weekStart(date) {
+  const start = new Date(date);
+  start.setHours(12, 0, 0, 0);
+  start.setDate(start.getDate() - (start.getDay() + 6) % 7);
+  return start;
+}
+function scheduleFor(date) {
+  const saved = sessions._schedule?.[dateKey(weekStart(date))];
+  const defaults = Object.fromEntries(WORKOUTS.map(workout => [workout.id, (workout.day + 6) % 7]));
+  if (!saved || !WORKOUTS.every(workout => Number.isInteger(saved[workout.id]) && saved[workout.id] >= 0 && saved[workout.id] <= 6) || new Set(Object.values(saved)).size !== 4) return defaults;
+  return saved;
+}
+function workoutOn(date) {
+  const schedule = scheduleFor(date);
+  return WORKOUTS.find(workout => schedule[workout.id] === (date.getDay() + 6) % 7);
+}
+function workoutDate(date, day) {
+  const result = weekStart(date);
+  result.setDate(result.getDate() + day);
+  return result;
+}
 function isTrainingDay(date) {
-  return WORKOUTS.some(workout => workout.day === date.getDay());
+  return Boolean(workoutOn(date));
 }
 function moveToTrainingDay(date, direction, includeCurrent = false) {
   if (!includeCurrent) date.setDate(date.getDate() + direction);
@@ -173,11 +196,11 @@ function moveToTrainingDay(date, direction, includeCurrent = false) {
   return date;
 }
 moveToTrainingDay(selectedDate, 1, true);
-const dateKey = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
+
 const escapeHTML = value => String(value).replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]));
 function previousEntry(workout, index) {
   const key = dateKey(selectedDate);
-  for (const day of Object.keys(sessions).filter(day => day < key).sort().reverse()) {
+  for (const day of Object.keys(sessions).filter(day => /^\d{4}-\d{2}-\d{2}$/.test(day) && day < key).sort().reverse()) {
     const entry = sessions[day]?.[workout.id]?.[index];
     if (entry && Number.isInteger(entry.sets) && Number.isInteger(entry.reps)) return {day, ...entry};
   }
@@ -189,7 +212,9 @@ function valuesFor(workout, index) {
   return {sets: saved?.sets ?? numbers[0], reps: saved?.reps ?? numbers[2] ?? numbers[1], weight: saved?.weight ?? ""};
 }
 function renderDashboard() {
-  const workout = WORKOUTS.find(item => item.day === selectedDate.getDay());
+  document.getElementById("schedule-status").textContent = "";
+  const workout = workoutOn(selectedDate);
+  renderSchedule();
   const isToday = dateKey(selectedDate) === dateKey(new Date());
   document.getElementById("day-label").textContent = new Intl.DateTimeFormat(undefined, {weekday:"long", month:"short", day:"numeric"}).format(selectedDate);
   const defaultDate = moveToTrainingDay(new Date(), 1, true);
@@ -210,6 +235,60 @@ function renderDashboard() {
   document.getElementById("workout-note").textContent = workout?.note || "";
   document.getElementById("save-status").textContent = storageAvailable ? "Saved on this browser · tap a number to edit" : "Browser storage unavailable. Changes may be lost on refresh.";
 }
+function renderSchedule() {
+  const schedule = scheduleFor(selectedDate);
+  const start = weekStart(selectedDate);
+  const end = workoutDate(selectedDate, 6);
+  const format = new Intl.DateTimeFormat(undefined, {month:"short", day:"numeric"});
+  document.getElementById("schedule-week").textContent = `${format.format(start)} – ${format.format(end)}`;
+  document.getElementById("schedule-days").innerHTML = [...WORKOUTS]
+    .sort((a,b) => schedule[a.id] - schedule[b.id])
+    .map(workout => `<label class="schedule-row"><span>${escapeHTML(workout.title)}</span><select data-workout="${workout.id}" aria-label="Day for ${escapeHTML(workout.title)}">${DAY_NAMES.map((day,index) => `<option value="${index}"${schedule[workout.id] === index ? " selected" : ""}>${day} ${format.format(workoutDate(selectedDate,index))}</option>`).join("")}</select></label>`).join("");
+  document.getElementById("planned-days").textContent = Object.values(schedule).sort((a,b)=>a-b).map(day=>DAY_NAMES[day].slice(0,3)).join(" · ");
+}
+function reschedule(workoutId, newDay) {
+  if (!WORKOUTS.some(workout => workout.id === workoutId) || !Number.isInteger(newDay) || newDay < 0 || newDay > 6) return;
+  const oldSchedule = scheduleFor(selectedDate);
+  if (oldSchedule[workoutId] === newDay) return;
+  const currentWorkout = workoutOn(selectedDate);
+  const newSchedule = {...oldSchedule};
+  const other = WORKOUTS.find(workout => workout.id !== workoutId && oldSchedule[workout.id] === newDay);
+  if (other) newSchedule[other.id] = oldSchedule[workoutId];
+  newSchedule[workoutId] = newDay;
+  const snapshot = JSON.parse(JSON.stringify(sessions));
+  // Collect before deleting so swaps preserve both workouts' entries.
+  const entries = WORKOUTS.map(workout => ({
+    id:workout.id,
+    oldKey:dateKey(workoutDate(selectedDate, oldSchedule[workout.id])),
+    newKey:dateKey(workoutDate(selectedDate, newSchedule[workout.id]))
+  })).map(item => ({...item, entry:sessions[item.oldKey]?.[item.id]}));
+  for (const item of entries) {
+    if (sessions[item.oldKey]) delete sessions[item.oldKey][item.id];
+  }
+  for (const item of entries) {
+    if (item.entry) {sessions[item.newKey] ||= {}; sessions[item.newKey][item.id] = item.entry;}
+  }
+  sessions._schedule ||= {};
+  sessions._schedule[dateKey(weekStart(selectedDate))] = newSchedule;
+  try {
+    // Schedule and moved entries persist together in one write.
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+  } catch {
+    sessions = snapshot;
+    renderSchedule();
+    document.getElementById("schedule-status").textContent = "Could not save the schedule. No workouts were moved. Check browser storage and try again.";
+    return;
+  }
+  storageAvailable = true;
+  if (currentWorkout) selectedDate = workoutDate(selectedDate, newSchedule[currentWorkout.id]);
+  renderDashboard();
+  document.getElementById("schedule-status").textContent = other
+    ? "Workouts swapped and saved for this week. Saved values moved with them."
+    : "Workout moved and saved for this week. Saved values moved with it.";
+}
+document.getElementById("schedule-days").addEventListener("change", event => {
+  if (event.target.matches("select[data-workout]")) reschedule(event.target.dataset.workout, Number(event.target.value));
+});
 function saveInput(input) {
   const isWeight = input.dataset.field === "weight";
   const value = isWeight && !input.value.trim() ? "" : Number(input.value);
@@ -222,7 +301,7 @@ function saveInput(input) {
     return;
   }
   input.removeAttribute("aria-invalid");
-  const workout = WORKOUTS.find(item => item.day === selectedDate.getDay());
+  const workout = workoutOn(selectedDate);
   const key = dateKey(selectedDate);
   const index = Number(input.dataset.index);
   sessions[key] ||= {};

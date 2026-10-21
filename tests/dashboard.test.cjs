@@ -11,7 +11,9 @@ function boot(date='2026-10-19T12:00:00', storage=new Map(), fail=false) {
   };
   class Clock extends Date {constructor(...args){super(...(args.length?args:[date]));}}
   vm.runInNewContext(source,{Date:Clock,Intl,Number,JSON,setTimeout,clearTimeout,document:{getElementById:get},localStorage:{getItem:key=>storage.get(key)||null,setItem(key,value){if(fail)throw Error('Quota');storage.set(key,value);}}});
-  return {get,storage,click:id=>get(id).listeners.click(),edit(index,field,value){
+  return {get,storage,click:id=>get(id).listeners.click(),move(id,day){
+    get('schedule-days').listeners.change({target:{matches:()=>true,dataset:{workout:id},value:String(day)}});
+  },edit(index,field,value){
     const attrs={};
     const input={value:String(value),dataset:{index:String(index),field},matches:()=>true,setAttribute:(k,v)=>attrs[k]=v,removeAttribute:k=>delete attrs[k]};
     get('workout-list').listeners.input({target:input});
@@ -135,4 +137,71 @@ test('corrected exercise guides render whole standalone images with clear moveme
   assert.match(monday,/Curl your lower legs down and back/);
   assert.match(wednesday,/Sit facing the machine/);
   assert.match(saturday,/palms facing each other/);
+});
+
+test('moves Monday to Tuesday, swaps Wednesday and Thursday, and navigates by date',()=>{
+  const app=boot();
+  app.move('monday-a',1);
+  assert.match(app.get('day-label').textContent,/Tuesday, Oct 20/);
+  app.move('thursday-light',2);
+  app.click('next-day');
+  assert.equal(app.get('workout-title').textContent,'Light + Core');
+  assert.match(app.get('day-label').textContent,/Wednesday, Oct 21/);
+  app.click('next-day');
+  assert.equal(app.get('workout-title').textContent,'Full Body B');
+  assert.match(app.get('day-label').textContent,/Thursday, Oct 22/);
+  app.click('previous-day');
+  assert.equal(app.get('workout-title').textContent,'Light + Core');
+  assert.equal(app.get('planned-days').textContent,'Tue · Wed · Thu · Sat');
+  const refreshed=boot('2026-10-20T12:00:00',app.storage);
+  assert.equal(refreshed.get('workout-title').textContent,'Full Body A');
+  assert.match(refreshed.get('day-label').textContent,/Tuesday, Oct 20/);
+  assert.match(boot('2026-10-26T12:00:00',app.storage).get('day-label').textContent,/Monday, Oct 26/);
+});
+test('moves saved data with both workouts in a swap and preserves earlier history',()=>{
+  const app=boot('2026-10-21T12:00:00');
+  app.edit(0,'weight',45.5); app.edit(0,'sets',3);
+  app.click('next-day'); app.edit(0,'weight',17.5);
+  app.move('thursday-light',2);
+  assert.match(app.get('day-label').textContent,/Wednesday, Oct 21/);
+  assert.match(app.get('workout-list').innerHTML,/value="17.5"/);
+  const data=JSON.parse(app.storage.get('gym-tracker-sessions-v1'));
+  assert.equal(data['2026-10-21']['thursday-light'][0].weight,17.5);
+  assert.equal(data['2026-10-22']['wednesday-b'][0].weight,45.5);
+  assert.equal(data['2026-10-22']['wednesday-b'][0].sets,3);
+  assert.equal(data['2026-10-21']['wednesday-b'],undefined);
+  app.click('next-day'); assert.match(app.get('workout-list').innerHTML,/value="45.5"/);
+  const next=boot('2026-10-28T12:00:00',app.storage);
+  assert.match(next.get('workout-list').innerHTML,/Last · 2026-10-22 · 3 × 12 · 45.5 kg/);
+});
+test('failed schedule persistence leaves data and selected day unchanged',()=>{
+  const storage=new Map([['gym-tracker-sessions-v1',JSON.stringify({'2026-10-19':{'monday-a':{0:{sets:3,reps:8,weight:30}}}})]]);
+  const before=storage.get('gym-tracker-sessions-v1');
+  const app=boot(undefined,storage,true);
+  app.move('monday-a',1);
+  assert.match(app.get('day-label').textContent,/Monday, Oct 19/);
+  assert.match(app.get('schedule-status').textContent,/No workouts were moved/);
+  assert.equal(storage.get('gym-tracker-sessions-v1'),before);
+  app.click('next-day'); assert.match(app.get('day-label').textContent,/Wednesday, Oct 21/);
+  app.click('previous-day'); assert.match(app.get('workout-list').innerHTML,/value="30"/);
+});
+test('Sunday moves cross month boundaries and next week retains its default schedule',()=>{
+  const app=boot('2026-12-31T12:00:00');
+  app.move('thursday-light',6);
+  assert.match(app.get('day-label').textContent,/Sunday, Jan 3/);
+  assert.equal(app.get('workout-title').textContent,'Light + Core');
+  app.click('next-day'); assert.match(app.get('day-label').textContent,/Monday, Jan 4/);
+  app.click('previous-day'); assert.match(app.get('day-label').textContent,/Sunday, Jan 3/);
+  assert.equal(boot('2027-01-03T12:00:00',app.storage).get('workout-title').textContent,'Light + Core');
+});
+test('rescheduling preserves weeks already saved and supports repeated moves',()=>{
+  const app=boot(); app.edit(0,'weight',22); app.move('monday-a',1); app.move('monday-a',4);
+  assert.match(app.get('day-label').textContent,/Friday, Oct 23/);
+  const next=boot('2026-10-26T12:00:00',app.storage); next.move('monday-a',1);
+  const previous=boot('2026-10-23T12:00:00',app.storage);
+  assert.equal(previous.get('workout-title').textContent,'Full Body A');
+  assert.match(previous.get('workout-list').innerHTML,/value="22"/);
+  previous.move('monday-a',0);
+  assert.match(previous.get('day-label').textContent,/Monday, Oct 19/);
+  assert.equal(boot('2026-10-27T12:00:00',app.storage).get('workout-title').textContent,'Full Body A');
 });
