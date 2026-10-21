@@ -87,3 +87,32 @@ test('existing sets and reps without weight remain readable',()=>{
   const entry=JSON.parse(storage.get('gym-tracker-sessions-v1'))['2026-10-19']['monday-a'][0];
   assert.deepEqual(entry,{sets:4,reps:9,weight:20});
 });
+
+test('exercise guide toggles independently of saved workout values',()=>{
+  const app=boot();
+  assert.match(app.get('workout-list').innerHTML,/aria-expanded="false" aria-controls="exercise-guide-0"/);
+  assert.match(app.get('workout-list').innerHTML,/images\/leg-press.svg/);
+  const attrs={'aria-expanded':'false','aria-controls':'exercise-guide-0'};
+  const button={getAttribute:key=>attrs[key],setAttribute:(key,value)=>attrs[key]=value};
+  const panel=app.get('exercise-guide-0'); panel.hidden=true;
+  const toggle=()=>app.get('workout-list').listeners.click({target:{closest:selector=>selector === ".exercise-toggle" ? button : null}});
+  app.edit(0,'weight',42.5);
+  toggle(); assert.equal(panel.hidden,false); assert.equal(attrs['aria-expanded'],'true');
+  toggle(); assert.equal(panel.hidden,true); assert.equal(attrs['aria-expanded'],'false');
+  app.get('workout-list').listeners.click({target:{closest:()=>null}});
+  assert.equal(panel.hidden,true);
+  assert.match(boot(undefined,app.storage).get('workout-list').innerHTML,/value="42.5"/);
+});
+test('every scheduled exercise has a bundled drawing and the main time label is removed',()=>{
+  const path=require('node:path');
+  const root=path.join(__dirname,'..');
+  for(const date of ['2026-10-19','2026-10-21','2026-10-22','2026-10-24']) {
+    const markup=boot(date+'T12:00:00').get('workout-list').innerHTML;
+    const images=[...markup.matchAll(/<img src="([^"]+)"/g)];
+    assert.ok(images.length>=3);
+    for(const [,image] of images) {
+      assert.ok(fs.readFileSync(path.join(root,image),'utf8').includes('<svg'));
+    }
+  }
+  assert.ok(!fs.readFileSync(path.join(root,'index.html'),'utf8').includes('id="session-time"'));
+});

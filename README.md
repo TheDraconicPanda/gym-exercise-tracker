@@ -1,6 +1,6 @@
 # Gym Exercise Tracker
 
-Current version: **0.2.1** — weight tracking and navigation between planned workout days.
+Current version: **0.2.2** — expandable illustrated exercise guides.
 
 A small, mobile-friendly workout tracker for a beginner four-day gym routine. Built with plain HTML, CSS, and JavaScript.
 
@@ -27,3 +27,5 @@ Run `node --test tests/dashboard.test.cjs` to check daily navigation, prescripti
 ## Training plan note
 
 Use comfortable ranges and controlled movements. Start light, leave roughly three reps in reserve, and rest 60–90 seconds between sets. Stop or adjust movements that cause pain; seek an appropriate clinical assessment if knee symptoms recur, worsen, or affect normal walking.
+
+Tap an exercise name to expand its start/finish line drawing and movement cue. Drawings are bundled SVG assets, with no external service or photo dependencies. The sets, reps, and weight controls remain independent of the guide toggle.

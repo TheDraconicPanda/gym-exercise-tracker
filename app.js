@@ -69,6 +69,65 @@ const WORKOUTS = [
   }
 ];
 
+const EXERCISE_GUIDES = {
+  "Leg press": {
+    "image": "images/leg-press.svg",
+    "cue": "Press the platform away without locking your knees."
+  },
+  "Seated chest press": {
+    "image": "images/chest-press.svg",
+    "cue": "Press forward, then return slowly with your back supported."
+  },
+  "Seated cable row": {
+    "image": "images/cable-row.svg",
+    "cue": "Pull toward your ribs, keeping your torso steady."
+  },
+  "Seated hamstring curl": {
+    "image": "images/hamstring-curl.svg",
+    "cue": "Curl your lower legs down under the seat; return with control."
+  },
+  "Lat pulldown": {
+    "image": "images/lat-pulldown.svg",
+    "cue": "Pull the bar toward your upper chest without leaning far back."
+  },
+  "Seated shoulder press": {
+    "image": "images/shoulder-press.svg",
+    "cue": "Press upward smoothly, keeping your back supported."
+  },
+  "Glute drive machine": {
+    "image": "images/glute-drive.svg",
+    "cue": "Drive through your feet and raise your hips without arching your back."
+  },
+  "Biceps curl machine": {
+    "image": "images/biceps-curl.svg",
+    "cue": "Curl toward your shoulders while keeping upper arms on the pad."
+  },
+  "Cable triceps pushdown": {
+    "image": "images/triceps-pushdown.svg",
+    "cue": "Keep elbows by your sides and extend your forearms downward."
+  },
+  "Pallof press": {
+    "image": "images/pallof-press.svg",
+    "cue": "Press straight out from your chest; resist turning toward the cable."
+  },
+  "Bird dog": {
+    "image": "images/bird-dog.svg",
+    "cue": "Reach opposite arm and leg out, keeping your hips level. Alternate sides."
+  },
+  "Chest press variation": {
+    "image": "images/chest-press-variation.svg",
+    "cue": "Press forward with control, using a comfortable grip."
+  },
+  "Chest-supported row": {
+    "image": "images/chest-supported-row.svg",
+    "cue": "Keep your chest against the pad as you pull your elbows back."
+  },
+  "Seated hip abductor": {
+    "image": "images/hip-abductor.svg",
+    "cue": "Open your knees outward, then return slowly without bouncing."
+  }
+};
+
 const STORAGE_KEY = "gym-tracker-sessions-v1";
 let sessions = {};
 let storageAvailable = true;
@@ -111,12 +170,12 @@ function renderDashboard() {
   document.getElementById("today-button").textContent = isTrainingDay(new Date()) ? "Today" : "Next workout";
   document.getElementById("day-status").textContent = isToday ? "Today" : "Your schedule";
   document.getElementById("workout-title").textContent = workout?.title || "Rest day";
-  document.getElementById("session-time").textContent = workout?.minutes || "No scheduled training";
   document.getElementById("workout-list").innerHTML = workout ? workout.exercises.map((exercise,index) => {
     const values = valuesFor(workout,index);
     const previous = previousEntry(workout,index);
     const perSide = exercise.target.includes("side");
-    return `<article class="exercise-row"><div class="exercise-name"><h2>${escapeHTML(exercise.name)}</h2><p>${previous ? `Last · ${escapeHTML(previous.day)} · ${previous.sets} × ${previous.reps}${previous.weight !== undefined && previous.weight !== "" ? ` · ${escapeHTML(previous.weight)} kg` : ""}${perSide ? " / side" : ""}` : `Suggested · ${escapeHTML(exercise.target)}`}</p></div><div class="exercise-values"><label><span>Sets</span><input type="number" inputmode="numeric" min="1" max="99" step="1" value="${values.sets}" data-index="${index}" data-field="sets" aria-label="${escapeHTML(exercise.name)} sets"></label><span class="multiply" aria-hidden="true">×</span><label><span>Reps${perSide ? " / side" : ""}</span><input type="number" inputmode="numeric" min="1" max="99" step="1" value="${values.reps}" data-index="${index}" data-field="reps" aria-label="${escapeHTML(exercise.name)} repetitions${perSide ? " per side" : ""}"></label><label class="weight-field"><span>kg</span><input type="number" inputmode="decimal" min="0" max="9999" step="any" placeholder="—" value="${escapeHTML(values.weight)}" data-index="${index}" data-field="weight" aria-label="${escapeHTML(exercise.name)} weight in kilograms"></label></div></article>`;
+    const guide = EXERCISE_GUIDES[exercise.name];
+    return `<article class="exercise-row"><div class="exercise-name"><h2><button class="exercise-toggle" type="button" aria-expanded="false" aria-controls="exercise-guide-${index}">${escapeHTML(exercise.name)}<span class="guide-chevron" aria-hidden="true">⌄</span></button></h2><p>${previous ? `Last · ${escapeHTML(previous.day)} · ${previous.sets} × ${previous.reps}${previous.weight !== undefined && previous.weight !== "" ? ` · ${escapeHTML(previous.weight)} kg` : ""}${perSide ? " / side" : ""}` : `Suggested · ${escapeHTML(exercise.target)}`}</p></div><div class="exercise-values"><label><span>Sets</span><input type="number" inputmode="numeric" min="1" max="99" step="1" value="${values.sets}" data-index="${index}" data-field="sets" aria-label="${escapeHTML(exercise.name)} sets"></label><span class="multiply" aria-hidden="true">×</span><label><span>Reps${perSide ? " / side" : ""}</span><input type="number" inputmode="numeric" min="1" max="99" step="1" value="${values.reps}" data-index="${index}" data-field="reps" aria-label="${escapeHTML(exercise.name)} repetitions${perSide ? " per side" : ""}"></label><label class="weight-field"><span>kg</span><input type="number" inputmode="decimal" min="0" max="9999" step="any" placeholder="—" value="${escapeHTML(values.weight)}" data-index="${index}" data-field="weight" aria-label="${escapeHTML(exercise.name)} weight in kilograms"></label></div><div class="exercise-guide" id="exercise-guide-${index}" hidden><img src="${guide.image}" alt="Line drawing of ${escapeHTML(exercise.name)}, showing start and finish positions" loading="lazy" width="420" height="210"><p>${escapeHTML(guide.cue)}</p></div></article>`;
   }).join("") : '<div class="rest-day">No workout planned. Use the arrows to view another day.</div>';
   document.getElementById("session-extras").hidden = !workout;
   document.getElementById("warmup").textContent = workout?.warmup || "";
@@ -151,6 +210,15 @@ function saveInput(input) {
     document.getElementById("save-status").textContent = "Could not save in this browser. Keep this page open to retain changes.";
   }
 }
+document.getElementById("workout-list").addEventListener("click", event => {
+  if (event.target.closest(".exercise-values, .exercise-guide")) return;
+  const button = event.target.closest(".exercise-toggle") ||
+    event.target.closest(".exercise-row")?.querySelector(".exercise-toggle");
+  if (!button) return;
+  const expanded = button.getAttribute("aria-expanded") === "true";
+  button.setAttribute("aria-expanded", String(!expanded));
+  document.getElementById(button.getAttribute("aria-controls")).hidden = expanded;
+});
 document.getElementById("workout-list").addEventListener("input", event => {
   if (event.target.matches("input")) saveInput(event.target);
 });

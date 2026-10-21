@@ -258,3 +258,30 @@ h1 {
   .exercise-name { flex-basis:100%; }
   .exercise-values { width:100%; justify-content:flex-end; }
 }
+
+.workout-heading { margin-bottom:20px; }
+.exercise-row { flex-wrap:wrap; }
+.exercise-toggle {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  width:100%;
+  padding:0;
+  border:0;
+  border-radius:4px;
+  min-width:0;
+  min-height:0;
+  background:transparent;
+  color:inherit;
+  font:inherit;
+  text-align:left;
+}
+.exercise-toggle:hover { background:transparent; color:var(--green); }
+.guide-chevron { color:var(--green); font-size:.85rem; flex-shrink:0; }
+.exercise-toggle[aria-expanded=true] .guide-chevron { transform:rotate(180deg); }
+.exercise-guide { flex-basis:100%; border-top:1px solid var(--line); padding-top:12px; }
+.exercise-guide img { display:block; width:100%; max-width:420px; height:auto; margin:0 auto; }
+.exercise-guide p { margin:10px 0 0; font-size:.78rem; color:var(--muted); }
+
+.exercise-row { cursor:pointer; }
+.exercise-values, .exercise-guide { cursor:auto; }
