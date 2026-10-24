@@ -1,6 +1,6 @@
 # Gym Exercise Tracker
 
-Current version: **0.3.0** — weekly workout rescheduling with automatic swaps and saved history.
+Current version: **0.3.1** — corrected hip abduction illustration and outer-glute muscle highlight.
 
 A small, mobile-friendly workout tracker for a beginner four-day gym routine. Built with plain HTML, CSS, and JavaScript.
 
@@ -35,3 +35,5 @@ Tap an exercise card to expand its shaded instructional illustration and movemen
 Open “Adjust this week's days” below the workout and choose a new day for any session. All seven weekdays are available. Moving onto an occupied day swaps the two sessions. Navigation follows the resulting date order and skips empty days. Changes apply to the displayed Monday–Sunday week only; other weeks keep their existing plan. Refresh still opens today's session or the next scheduled one.
 
 Saved sets, reps, and weights move with each rescheduled workout, including both entries in a swap. Schedule and workout data persist together in the existing browser storage record. If storage fails, the move is rolled back. Previous-session reminders use the updated dates.
+
+The seated hip abductor guide shows knees moving outward against pads on the outside of the thighs, with an outer-glute anatomy inset. Hip adduction (bringing knees inward) is a different movement.

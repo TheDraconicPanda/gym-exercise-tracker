@@ -205,3 +205,13 @@ test('rescheduling preserves weeks already saved and supports repeated moves',()
   assert.match(previous.get('day-label').textContent,/Monday, Oct 19/);
   assert.equal(boot('2026-10-27T12:00:00',app.storage).get('workout-title').textContent,'Full Body A');
 });
+
+test('hip abductor uses its own outward-motion guide and outer-glute description',()=>{
+  const markup=boot('2026-10-24T12:00:00').get('workout-list').innerHTML;
+  assert.ok(markup.includes('data-layout="standalone"><img src="images/hip-abduction-steps.png"'));
+  assert.match(markup,/pads on the outside of the thighs/);
+  assert.match(markup,/Push your knees outward/);
+  assert.match(markup,/upper outer glutes/);
+  const image=markup.match(/<img src="images\/hip-abduction-steps.png"[^>]+>/)[0];
+  assert.match(image,/style=""/);
+});
